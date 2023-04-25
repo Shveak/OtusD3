@@ -1,9 +1,10 @@
-package services;
+package org.otus.services;
 
-import dto.Pet;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
+import org.otus.dto.Pet;
 
 import static io.restassured.RestAssured.given;
 
@@ -15,9 +16,7 @@ public class PetApi {
     public PetApi() {
         spec = given()
                 .baseUri(BASE_URI)
-                .contentType(ContentType.JSON)
-
-        ;
+                .contentType(ContentType.JSON);
     }
 
     public Response addPet(Pet pet) {
@@ -49,12 +48,14 @@ public class PetApi {
                         .get(PET + "/" + id);
     }
 
-    public Response deletePetById(String id) {
+    public ValidatableResponse deletePetById(String id) {
         return
                 given(spec)
                         .with()
                         .log().all()
                         .when()
-                        .delete(PET + "/" + id);
+                        .delete(PET + "/" + id)
+                        .then()
+                        .log().all();
     }
 }

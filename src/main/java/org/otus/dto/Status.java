@@ -1,16 +1,14 @@
-
-package dto;
-
+package org.otus.dto;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import lombok.Data;
+import lombok.Getter;
 import lombok.experimental.Accessors;
 
-@Data
+@Getter
 @Accessors(fluent = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class TagPet {
-
-    private String id;
-    private String name;
+public enum Status {
+    available,
+    pending,
+    sold
 }

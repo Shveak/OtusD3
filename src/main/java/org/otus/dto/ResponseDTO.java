@@ -1,14 +1,16 @@
-package dto;
+
+package org.otus.dto;
+
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import lombok.Getter;
+import lombok.Data;
 import lombok.experimental.Accessors;
 
-@Getter
+@Data
 @Accessors(fluent = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public enum Status {
-    available,
-    pending,
-    sold
+public class ResponseDTO {
+    private Long code;
+    private String message;
+    private String type;
 }

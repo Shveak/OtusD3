@@ -1,5 +1,5 @@
 
-package dto;
+package org.otus.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
