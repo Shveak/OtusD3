@@ -20,7 +20,7 @@ import static org.otus.dto.Status.available;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TestForPet {
-    public static final PetApi PET_API = new PetApi();
+    private static final PetApi PET_API = new PetApi("https://petstore.swagger.io/v2");
 
     //
 // Создаем запрос, объект класса Pet
