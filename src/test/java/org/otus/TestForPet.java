@@ -22,7 +22,7 @@ import static org.otus.dto.Status.available;
 public class TestForPet {
     public static final PetApi PET_API = new PetApi();
 
-//
+    //
 // Создаем запрос, объект класса Pet
 //
 // Отправляем POST-запрос в endpoint PET на добавление нового животного (кошка-Мурка)
@@ -43,7 +43,7 @@ public class TestForPet {
         Assertions.assertEquals(request, response.then().extract().as(Pet.class));
     }
 
-//
+    //
 // Отправляем GET-запрос в endpoint PET/+{id животного} для поиска животного
 //
 // Проверяем реквизиты ответа:
@@ -63,7 +63,7 @@ public class TestForPet {
                 .body("category.name", comparesEqualTo("Cat"));
     }
 
-//
+    //
 //  Меняем наш объект класса Pet на собаку Barsik
 //
 // Отправляем PUT-запрос в endpoint PET на изменение существующего животного
@@ -90,7 +90,7 @@ public class TestForPet {
         Assertions.assertEquals(pet.category(), category);
     }
 
-//
+    //
 // Отправляем DELETE-запрос в endpoint PET/+{id животного} для удаления животного
 //
 // Проверяем реквизиты ответа:
@@ -111,7 +111,7 @@ public class TestForPet {
                 .body("message", comparesEqualTo(getPet().id()));
     }
 
-//
+    //
 // Отправляем GET-запрос в endpoint PET/+{id животного} для поиска животного,
 // которого нет в БД, мы его удалили ранее
 // Проверяем реквизиты ответа:
@@ -130,9 +130,9 @@ public class TestForPet {
                 .body(JsonSchemaValidator.matchesJsonSchemaInClasspath("schema/DeletePet.json"));
         ResponseDTO responseDTO = response.as(ResponseDTO.class);
         Assertions.assertAll("Поиск животного, которого нет в БД",
-                () -> Assertions.assertEquals(responseDTO.code(), 1),
-                () -> Assertions.assertEquals(responseDTO.type(), "error"),
-                () -> Assertions.assertEquals(responseDTO.message(), "Pet not found")
+            () -> Assertions.assertEquals(responseDTO.code(), 1),
+            () -> Assertions.assertEquals(responseDTO.type(), "error"),
+            () -> Assertions.assertEquals(responseDTO.message(), "Pet not found")
         );
     }
 

@@ -1,7 +1,6 @@
 
 package org.otus.dto;
 
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
