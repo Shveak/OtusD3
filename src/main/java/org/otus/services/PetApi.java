@@ -9,12 +9,13 @@ import org.otus.dto.Pet;
 import static io.restassured.RestAssured.given;
 
 public class PetApi {
+    private static final String URL = System.getProperty("url.swagger", "https://petstore.swagger.io/v2");
     private static final String PET = "/pet";
     private final RequestSpecification spec;
 
-    public PetApi(String url) {
+    public PetApi() {
         spec = given()
-                .baseUri(url)
+                .baseUri(URL)
                 .contentType(ContentType.JSON);
     }
 

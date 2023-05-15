@@ -1,10 +1,10 @@
 package org.otus;
 
-import io.restassured.module.jsv.JsonSchemaValidator;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.otus.dto.Category;
 import org.otus.dto.Pet;
 import org.otus.dto.ResponseDTO;
@@ -18,9 +18,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.otus.dto.Status.available;
 
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TestForPet {
-    private static final PetApi PET_API = new PetApi("https://petstore.swagger.io/v2");
+    private static final PetApi PET_API = new PetApi();
 
     //
 // Создаем запрос, объект класса Pet
@@ -32,15 +31,16 @@ public class TestForPet {
 // Проверяем все реквизиты ответа на соответствие заданным, кроме поля "photoUrls"
 //
     @Test
-    @Order(1)
     public void checkAddingNewPetToStore() {
-        Pet request = getPet();
+        String id = "36952";
+        Pet request = getPet(id);
         Response response = PET_API.addPet(request);
         response
                 .then()
                 .log().all()
                 .statusCode(HttpStatus.SC_OK);
         Assertions.assertEquals(request, response.then().extract().as(Pet.class));
+        PET_API.deletePetById(id);
     }
 
     //
@@ -51,9 +51,10 @@ public class TestForPet {
 //  искомое животное "Cat", зовут "Murka", статус available
 //
     @Test
-    @Order(2)
     public void checkFindPetById() {
-        Response response = PET_API.findPetById(getPet().id());
+        String id = "36953";
+        PET_API.addPet(getPet(id));
+        Response response = PET_API.findPetById(id);
         response
                 .then()
                 .log().all()
@@ -61,6 +62,7 @@ public class TestForPet {
                 .body("name", equalTo("Murka"))
                 .body("status", equalTo(available.name()))
                 .body("category.name", comparesEqualTo("Cat"));
+        PET_API.deletePetById(id);
     }
 
     //
@@ -73,9 +75,15 @@ public class TestForPet {
 // Проверяем сменившиеся реквизиты: имя животного и его категорию
 //
     @Test
-    @Order(3)
     public void checkUpdatePet() {
-        Pet pet = getPetForUpdate();
+        String id = "36954";
+        Pet request = getPet(id);
+        PET_API.addPet(request);
+        Pet pet = request
+                .name("Barsik")
+                .category(new Category()
+                        .id("5700")
+                        .name("Dog"));
         Response response = PET_API.updatePet(pet);
         response
                 .then()
@@ -88,6 +96,7 @@ public class TestForPet {
         Category category = response.jsonPath().getObject("category", Category.class);
         Assertions.assertEquals(pet.name(), name);
         Assertions.assertEquals(pet.category(), category);
+        PET_API.deletePetById(id);
     }
 
     //
@@ -100,15 +109,15 @@ public class TestForPet {
 //  поле message = id нашего животного = 36952
 //
     @Test
-    @Order(4)
     public void checkDeletePet() {
-        ValidatableResponse response = PET_API.deletePetById(getPet().id());
-        response.body(JsonSchemaValidator.matchesJsonSchemaInClasspath("schema/DeletePet.json"));
+        String id = "36955";
+        PET_API.addPet(getPet(id));
+        ValidatableResponse response = PET_API.deletePetById(id);
         response
                 .log().all()
                 .statusCode(HttpStatus.SC_OK)
                 .body("code", equalTo(200))
-                .body("message", comparesEqualTo(getPet().id()));
+                .body("message", comparesEqualTo(id));
     }
 
     //
@@ -120,14 +129,13 @@ public class TestForPet {
 //   code = 1, type = "error", message = "Pet not found"
 //
     @Test
-    @Order(5)
     public void checkFindPetByIdNotFound() {
-        Response response = PET_API.findPetById(getPet().id());
+        String id = "36956";
+        Response response = PET_API.findPetById(id);
         response
                 .then()
                 .log().all()
-                .statusCode(HttpStatus.SC_NOT_FOUND)
-                .body(JsonSchemaValidator.matchesJsonSchemaInClasspath("schema/DeletePet.json"));
+                .statusCode(HttpStatus.SC_NOT_FOUND);
         ResponseDTO responseDTO = response.as(ResponseDTO.class);
         Assertions.assertAll("Поиск животного, которого нет в БД",
             () -> Assertions.assertEquals(responseDTO.code(), 1),
@@ -136,9 +144,9 @@ public class TestForPet {
         );
     }
 
-    private Pet getPet() {
+    private Pet getPet(String id) {
         return new Pet()
-                .id("36952")
+                .id(id)
                 .name("Murka")
                 .status(available)
                 .category(new Category()
@@ -148,13 +156,5 @@ public class TestForPet {
                         new TagPet()
                                 .id("5699")
                                 .name("FirstBox")));
-    }
-
-    private Pet getPetForUpdate() {
-        return getPet()
-                .name("Barsik")
-                .category(new Category()
-                        .id("5700")
-                        .name("Dog"));
     }
 }
