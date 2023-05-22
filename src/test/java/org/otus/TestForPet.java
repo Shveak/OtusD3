@@ -3,7 +3,9 @@ package org.otus;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.otus.dto.Category;
 import org.otus.dto.Pet;
@@ -20,6 +22,20 @@ import static org.otus.dto.Status.available;
 
 public class TestForPet {
     private static final PetApi PET_API = new PetApi();
+    private String id;
+    private boolean isNeedDeleted;
+
+    @BeforeEach
+    public void runBeforeTestMethod() {
+        isNeedDeleted = false;
+    }
+
+    @AfterEach
+    public void runAfterTestMethod() {
+        if (isNeedDeleted) {
+            PET_API.deletePetById(id);
+        }
+    }
 
     //
 // Создаем запрос, объект класса Pet
@@ -32,15 +48,15 @@ public class TestForPet {
 //
     @Test
     public void checkAddingNewPetToStore() {
-        String id = "36952";
+        id = "36952";
         Pet request = getPet(id);
         Response response = PET_API.addPet(request);
+        isNeedDeleted = true;
         response
                 .then()
                 .log().all()
                 .statusCode(HttpStatus.SC_OK);
         Assertions.assertEquals(request, response.then().extract().as(Pet.class));
-        PET_API.deletePetById(id);
     }
 
     //
@@ -52,8 +68,9 @@ public class TestForPet {
 //
     @Test
     public void checkFindPetById() {
-        String id = "36953";
+        id = "36953";
         PET_API.addPet(getPet(id));
+        isNeedDeleted = true;
         Response response = PET_API.findPetById(id);
         response
                 .then()
@@ -62,7 +79,6 @@ public class TestForPet {
                 .body("name", equalTo("Murka"))
                 .body("status", equalTo(available.name()))
                 .body("category.name", comparesEqualTo("Cat"));
-        PET_API.deletePetById(id);
     }
 
     //
@@ -76,9 +92,10 @@ public class TestForPet {
 //
     @Test
     public void checkUpdatePet() {
-        String id = "36954";
+        id = "36954";
         Pet request = getPet(id);
         PET_API.addPet(request);
+        isNeedDeleted = true;
         Pet pet = request
                 .name("Barsik")
                 .category(new Category()
@@ -96,7 +113,6 @@ public class TestForPet {
         Category category = response.jsonPath().getObject("category", Category.class);
         Assertions.assertEquals(pet.name(), name);
         Assertions.assertEquals(pet.category(), category);
-        PET_API.deletePetById(id);
     }
 
     //
@@ -110,7 +126,7 @@ public class TestForPet {
 //
     @Test
     public void checkDeletePet() {
-        String id = "36955";
+        id = "36955";
         PET_API.addPet(getPet(id));
         ValidatableResponse response = PET_API.deletePetById(id);
         response
@@ -130,7 +146,7 @@ public class TestForPet {
 //
     @Test
     public void checkFindPetByIdNotFound() {
-        String id = "36956";
+        id = "36956";
         Response response = PET_API.findPetById(id);
         response
                 .then()
